@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titel %}Registrieren{% endblock %}
+
+{% block inhalt %}
+  <h1>Mitarbeiterkonto erstellen</h1>
+
+  <form method="post">
+    <label>Name
+      <input name="name" autocomplete="name" required autofocus>
+    </label>
+    <label>Benutzername
+      <input name="benutzername" autocomplete="username" required>
+    </label>
+    <label>Passwort
+      <input type="password" name="passwort" autocomplete="new-password" required>
+    </label>
+    <button type="submit">Registrieren</button>
+  </form>
+
+  <p>Schon registriert? <a href="{{ url_for('login') }}">Anmelden</a></p>
+{% endblock %}

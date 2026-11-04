@@ -11,6 +11,7 @@ from datetime import date, datetime
 from functools import wraps
 from pathlib import Path
 
+import click
 from flask import (
     Flask, Response, flash, g, redirect, render_template, request, session, url_for,
 )
@@ -70,6 +71,21 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/registrieren", methods=["GET", "POST"])
+def registrieren():
+    if request.method == "POST":
+        ok, fehler = db.mitarbeiter_registrieren(
+            request.form.get("name", ""),
+            request.form.get("benutzername", ""),
+            request.form.get("passwort", ""),
+        )
+        if ok:
+            flash("Konto erstellt. Du kannst dich jetzt anmelden.", "erfolg")
+            return redirect(url_for("login"))
+        flash(fehler, "fehler")
+    return render_template("registrieren.html")
+
+
 @app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
@@ -99,6 +115,17 @@ def stempeln():
         flash(fehler, "fehler")
 
     return render_template("stempeln.html", projekte=db.alle_projekte())
+
+
+@app.route("/ausstempeln", methods=["POST"])
+@login_erforderlich
+def ausstempeln():
+    ok, fehler = db.ausstempeln(g.benutzer["id"])
+    if ok:
+        flash("Ausgestempelt.", "erfolg")
+    else:
+        flash(fehler, "fehler")
+    return redirect(url_for("startseite"))
 
 
 # UC4: Tagesübersicht (mit Pausenwarnung)
@@ -238,7 +265,17 @@ def init_db():
     db.mitarbeiter_anlegen("Chefin", "chefin", "chefin123", ist_chefin=True)
     db.mitarbeiter_anlegen("Joel", "joel", "joel123")
     db.mitarbeiter_anlegen("Tijana", "tijana", "tijana123")
+    db.mitarbeiter_anlegen("Jetish", "jetish", "Beis2015", ist_chefin=True)
     print("Datenbank angelegt.")
+
+
+@app.cli.command("grant-admin")
+@click.argument("benutzername")
+def grant_admin(benutzername):
+    """Vergibt Adminrechte, ohne Datenbank oder Stempelungen zurückzusetzen."""
+    if not db.admin_rechte_vergeben(benutzername):
+        raise click.ClickException(f"Benutzer {benutzername!r} wurde nicht gefunden.")
+    print(f"Adminrechte für {benutzername} vergeben.")
 
 
 if __name__ == "__main__":

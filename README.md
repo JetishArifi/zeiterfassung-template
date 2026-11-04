@@ -15,6 +15,18 @@ flask --app app init-db                 # Datenbank anlegen (löscht alte Daten)
 flask --app app run --debug
 ```
 
+Hauptbenutzer Jetish nach `init-db`: Benutzername `jetish`, Passwort `Beis2015`.
+Weitere Mitarbeitende können sich über den Link **Mitarbeiterkonto erstellen**
+auf der Anmeldeseite mit Name, Benutzername und Passwort registrieren.
+Nach der Anmeldung können sie **Projekt wählen und einstempeln**. Die Startseite
+zeigt danach das Projekt und die live laufende Zeit; über **Ausstempeln** wird
+die Stempelung beendet.
+Jetish kann über **Mitarbeitende kontrollieren** die Stempelungen aller
+Mitarbeitenden ansehen, filtern und korrigieren. Das Konto `chefin` hat ebenfalls
+Kontrollrechte.
+Einem bestehenden Konto kannst du Adminrechte ohne Datenverlust geben:
+`flask --app app grant-admin jetish`.
+
 Dann <http://127.0.0.1:5000> öffnen. Mit `--debug` lädt der Server bei jeder
 Änderung am Code neu.
 

@@ -62,6 +62,32 @@ def mitarbeiter_anlegen(name, benutzername, passwort, ist_chefin=False):
     db.commit()
 
 
+def admin_rechte_vergeben(benutzername: str) -> bool:
+    """Vergibt Adminrechte an ein bestehendes Konto."""
+    db = verbindung()
+    cursor = db.execute(
+        "UPDATE mitarbeiter SET ist_chefin = 1 WHERE benutzername = ?",
+        (benutzername.strip(),),
+    )
+    db.commit()
+    return cursor.rowcount == 1
+
+
+def mitarbeiter_registrieren(name: str, benutzername: str, passwort: str):
+    """Registriert einen Mitarbeiter ohne Administratorrechte."""
+    name = name.strip()
+    benutzername = benutzername.strip()
+    if not name or not benutzername or not passwort:
+        return False, "Bitte alle Felder ausfüllen."
+
+    try:
+        mitarbeiter_anlegen(name, benutzername, passwort)
+    except sqlite3.IntegrityError:
+        return False, "Dieser Benutzername ist bereits vergeben."
+
+    return True, None
+
+
 def anmelden(benutzername: str, passwort: str):
     """Gibt die Zeile der Person zurück, wenn Benutzername und Passwort stimmen, sonst None."""
     zeile = verbindung().execute(
@@ -151,6 +177,20 @@ def einstempeln(mitarbeiter_id: int, projekt_nummer: str):
         db.rollback()
         return False, "Mitarbeiter/in oder Projekt gibt es nicht."
 
+    return True, None
+
+
+def ausstempeln(mitarbeiter_id: int):
+    """Beendet die laufende Stempelung einer Person."""
+    db = verbindung()
+    jetzt = datetime.now().isoformat(timespec="seconds")
+    cursor = db.execute(
+        "UPDATE stempelung SET ende = ? WHERE mitarbeiter_id = ? AND ende IS NULL",
+        (jetzt, mitarbeiter_id),
+    )
+    db.commit()
+    if cursor.rowcount == 0:
+        return False, "Du bist derzeit nicht eingestempelt."
     return True, None
 
 

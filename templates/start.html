@@ -2,10 +2,33 @@
 {% block titel %}Start{% endblock %}
 {% block inhalt %}
 <h1>Zeiterfassung</h1>
-<p>Die App läuft.</p>
-<ul>
-  <li>Flask mit Jinja-Templates</li>
-  <li>Pico.css für das Aussehen</li>
-  <li>SQLite {{ sqlite_version }} als Datenbank</li>
-</ul>
+{% if laufend %}
+  <article>
+    <h2>Du bist eingestempelt</h2>
+    <p>Projekt: {{ laufend["nummer"] }} – {{ laufend["name"] }}</p>
+    <p>Beginn: {{ laufend["beginn"][11:16] }}</p>
+    <p>Laufende Zeit: <strong id="laufzeit" data-beginn="{{ laufend['beginn'] }}">--:--:--</strong></p>
+    <form method="post" action="{{ url_for('ausstempeln') }}">
+      <button type="submit" class="contrast">Ausstempeln</button>
+    </form>
+  </article>
+{% else %}
+  <p>Du bist momentan nicht eingestempelt.</p>
+  <a href="{{ url_for('stempeln') }}" role="button">Projekt wählen und einstempeln</a>
+{% endif %}
+<script>
+  const laufzeit = document.getElementById("laufzeit");
+  if (laufzeit) {
+    const beginn = new Date(laufzeit.dataset.beginn);
+    const aktualisieren = () => {
+      const sekunden = Math.max(0, Math.floor((Date.now() - beginn.getTime()) / 1000));
+      const stunden = String(Math.floor(sekunden / 3600)).padStart(2, "0");
+      const minuten = String(Math.floor((sekunden % 3600) / 60)).padStart(2, "0");
+      const rest = String(sekunden % 60).padStart(2, "0");
+      laufzeit.textContent = `${stunden}:${minuten}:${rest}`;
+    };
+    aktualisieren();
+    window.setInterval(aktualisieren, 1000);
+  }
+</script>
 {% endblock %}

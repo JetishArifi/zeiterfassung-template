@@ -21,7 +21,7 @@
 <div class="projektliste">
     {% for projekt in projekte %}
     <div class="projekt">
-        <p>{{ projekt["projektnummer"]}}. {{projekt["name"]}}</p>
+        <p>{{ projekt["nummer"] }}. {{ projekt["name"] }}</p>
     </div>
     {% else %}
     <p>Noch keine Projekte vorhanden.</p>
